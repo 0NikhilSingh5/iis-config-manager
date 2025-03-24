@@ -1,87 +1,127 @@
-# IIS Config Manager
+# IIS Site Manager
 
-An all in one IIS configuraiton manager for windows. This script allows you to manage IIS sites, check connection strings, encrypt and decrypt web.config files, and more.
+## Overview
+The **IIS Site Manager** is a PowerShell-based GUI tool designed to manage IIS sites effectively. It provides functionalities such as:
 
+- Listing all IIS sites with their details.
+- Checking and displaying connection strings from web.config files.
+- Encrypting and decrypting the connection strings within web.config.
+- Refreshing site information dynamically.
 
-## Prerequisites
+This tool is particularly useful for administrators who need an easy way to manage IIS site configurations and security settings.
 
-- Windows OS with IIS(v7.0 or greater) installed
-- PowerShell 5.1 or later
-- Administrative privileges
-
-## Installation/Usage
-
-   - Clone the reporsitory and click on `IIS-Config Manager.exe` 
-   - download the script file `iis_config_manager.ps1` add changes as per your need and run it with administrator privileges using PowerShell.
-   - Download the latest release from the [Releases](https://github.com/N1kh1lS1ngh25/iis-config-manager/releases/download/v.1.2.2/IIS-Config.Manager.exe)
-
-
+---
 
 ## Features
+- ✅ **Graphical User Interface (GUI)** for ease of use.
+- 🔍 **View IIS site details**, including hostname, application pool status, and web.config encryption status.
+- 🔐 **Encrypt and decrypt web.config connection strings**.
+- 🔄 **Refresh site details dynamically**.
+- 📜 **Retrieve and display connection strings securely**.
 
-### Main Window
+---
 
-The main window displays a list of IIS sites with the following information:
-- Number
-- Site Name
-- Host Name
-- AppPool Status
-- WebConfig Status
+## Prerequisites
+Ensure your system meets the following requirements before running the script:
 
-### Buttons
+- **Windows OS** with IIS installed.
+- **PowerShell (Admin Mode)**
+- **.NET Framework 4.0 or later**
 
-- **Refresh Sites**: Updates the list of IIS sites.
-- **Check Connection String**: Displays the connection string for the selected site.(Web.config must be decrypted to view the connection string).
-- **Encrypt Web.Config**: Encrypts the web.config file of the selected site (visible only for unencrypted sites).
-- **Decrypt Web.Config**: Decrypts the web.config file of the selected site (visible only for encrypted sites).
+### Required PowerShell Modules
+This script uses the `WebAdministration` module to interact with IIS.
 
-## Step-by-Step Guide
+To install it, run:
+```powershell
+Install-Module -Name WebAdministration -Force
+```
 
-1. **Launch the Application**
-   - Double click the `IIS-Config Manager.exe` to run.
-  (If prompted for elevated privileges, confirm to run the script as an administrator)
-   - The main window will appear, displaying a list of IIS sites.
+---
 
-1. **Refresh Site List**
-   - Click the "Refresh Sites" button to update the list of IIS sites.
+## Installation & Usage
 
-2. **Select a Site**
-   - Click on a site name in the list to select it.
-   - The encrypt/decrypt buttons will become visible based on the site's current encryption status.
+### Step 1: Running the Script
+1. Open **PowerShell as Administrator**.
+2. Run the script using:
+   ```powershell
+   .\IIS-Site-Manager.ps1
+   ```
 
-3. **Check Connection String**
-   - Select a site from the list.
-   - Click the "Check Connection String" button.
-   - If the web.config is encrypted, you'll be prompted to decrypt it temporarily.
-   - The connection string details will be displayed in the output box.
+### Step 2: Navigating the GUI
+Once the script runs, you’ll see the **IIS Site Manager** interface:
 
-4. **Encrypt Web.Config**
-   - Select an unencrypted site from the list.
-   - Click the "Encrypt Web.Config" button.
-   - A confirmation message will appear when encryption is complete.
+- **ListView Panel**: Displays all IIS sites with their details.
+- **Output Box**: Shows connection string details.
+- **Buttons**:
+  - **Refresh Sites**: Reloads IIS site data.
+  - **Check Connection String**: Retrieves database credentials from web.config.
+  - **Encrypt Web.Config**: Secures the connection strings.
+  - **Decrypt Web.Config**: Reveals the encrypted connection strings.
 
-5. **Decrypt Web.Config**
-   - Select an encrypted site from the list.
-   - Click the "Decrypt Web.Config" button.
-   - A confirmation message will appear when decryption is complete.
+---
+
+## Functionalities Explained
+
+### 🔍 Fetching IIS Site Details
+The script retrieves IIS sites using:
+```powershell
+Get-ChildItem IIS:\Sites
+```
+This fetches site names, bindings, and application pool statuses.
+
+### 🔐 Encryption & Decryption
+Uses `aspnet_regiis.exe` to encrypt/decrypt connection strings in `web.config`:
+```powershell
+& "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\aspnet_regiis.exe" -pef "connectionStrings" "$physicalpath"
+```
+
+### 📜 Retrieving Connection Strings
+Extracts connection strings from web.config and displays them in a formatted manner:
+```powershell
+[xml]$webConfig = Get-Content $webConfigPath
+$connectionStrings = $webConfig.configuration.connectionStrings.add | Where-Object { $_.name -eq "ProjectX" }
+```
+
+---
+
+## Example Output
+When you check connection strings, the tool displays:
+```plaintext
+Connection String Details:
+-------------------------
+Server  : db-server.domain.com
+Database: ProjectX_DB
+Username: admin_user
+Password: ********
+Extra   : Encrypt=True;TrustServerCertificate=False
+-------------------------
+```
+
+---
 
 ## Troubleshooting
 
-If you encounter any issues:
+### 🛑 IIS Not Found Error
+- Ensure IIS is installed and running.
+- Run PowerShell as an **Administrator**.
 
-1. Ensure you're running the script with administrative privileges.
-2. Check that IIS is properly installed and configured on your system.Click [here]() to install and configure IIS on your system.
-3. Verify that the web.config files for your sites are accessible and not locked by another process.
+### 🔄 Web.Config Not Found
+- Verify the site has a `web.config` file in its root directory.
+- Ensure the correct permissions are set.
 
-## Notes
+### 🔐 Encryption Issues
+- Make sure the correct .NET Framework version is installed.
+- Run the script in **Administrator mode**.
 
-- The script automatically runs with elevated privileges if necessary.
-- The PowerShell console window is hidden by default to provide a cleaner user experience.
-- Web.config encryption/decryption is performed using the aspnet_regiis.exe tool.
+---
 
-## Feedback and Contributions
+## Author
+**Nikhil Singh** - DevOps Engineer & Automation Specialist 🚀
 
-  Feel Free to :
+🔗 [LinkedIn](https://www.linkedin.com/in/nikhil-singh)
 
-- Report issues or suggest enhancements by creating a new issue on the [GitHub repository](https://github.com/N1kh1lS1ngh25/iis-config-manager)
-- Star⭐ the repository if you find it useful.😁
+---
+
+## License
+This project is open-source and available under the **MIT License**.
+
